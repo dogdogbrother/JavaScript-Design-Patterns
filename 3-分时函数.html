@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+// 分时函数 和函数节流不同，有些函数是用户主动调用的，但是因为一些客观原因，这些函数会影响性能。
+// 举个例子说创建qq好友列表，通常一口气操作添加1000个dom元素也有点吃不住
+// 解决方案之一是下面的timeChunk函数，此函数让创建节点的工作分批进行，比如1秒创建1000个节点，改成每隔200毫秒创建8个节点。
+// timeChunk函数接受三个参数，第一个是创建节点需要用到的参数，第二个参数是封装创建节点逻辑的函数，第三个参数辨识每一批创建节点的数量
+
+// 这个函数依旧是闭包的应用
+
+var timeChunk = function( arr, fn, count){
+  var obj,
+      t;
+  var len = arr.length;               //记录传入数组参数的总长度
+  var start = function(){             //记录一个函数
+    for(var i=0; i<Math.min(count || 1 , arr.length); i++){  //这个判断条件挺巧妙的，把count参数的数值和数组长度进行比较，小的为准。就是为了规避传参传的不好
+      var obj = arr.shift();    //把参数数组第一位删除并返回给obj，其实这个obj是没用的，这行代码就是为了减少arr，而且这个和上面的判断也有关联，如果arr少于了参数，就以arr为准
+      fn(obj);                  //执行参数函数的操作，也就是添加节点               
+    }
+  }
+  return function(){          
+    t = setInterval(function(){   //开启一个定时器
+      if (arr.length === 0) {     //因为上面arr闭包变量在不停的被减少，所以当被减没的时候，清除定时器，并且终止函数的执行。而且这个判断条件===0就意味着至少
+        return clearInterval(t);  //arr长度至少是1，和count || 1 就对应上了，秒啊
+      }
+      start();                    //如果arr数组还有，那就执行上面的start函数，里面会执行参数函数的。直到arr被减成0
+    },800)
+  }
+}
+// 分时 timeChunk 函数写好了，我们用一下，创建1000个dom元素，每次创建8个节点。
+var ary = [];
+for(var i=1; i<=100; i++){
+  ary.push(i);
+}
+var renderFriendList = timeChunk(ary, function(){
+  var div = document.createElement('div');
+  div.innerHTML = 'nnnnnnnnnnnnnnnnnnnnn';
+  document.body.appendChild(div);
+},8)
+
+renderFriendList();
+</script>
+</html>

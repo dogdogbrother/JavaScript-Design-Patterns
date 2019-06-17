@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+//函数节流，就是要求函数500毫秒只能执行一次的操作。
+
+var throttle = function(fn,interval){
+  var _selt = fn,           //_selt是传参进来的函数，也就是真正要被执行的函数
+      timer,                //其实就是清除定时器时用的变量
+      firstTime = true;     //记录下是否是第一次调用
+  return function(){        //onresize本身就是个函数事件，这里形成了一个闭包
+    var args = arguments;   //args存储了传进来的参数，正常来讲，传进来的参数应该是与2个，第一个是函数，第二个是数值。
+        _me = this;         //保存了当前this。  
+    if (firstTime) {          //firstTime 假如是第一次调用，就不需要延迟执行。因为有闭包的关系，所以能记录这个状态
+      _selt.apply(_me,args);      //执行传进来的函数 其实这个地方可以直接_selt(args),为啥要修正this指向呢？没看明白，也许没啥深意作者习惯了这么写吧。
+      return firstTime = false;   // return firstTime = false;这个操作不是真的为了返回什么，只是单纯的把2行代码写在了一行。
+    }
+    if (timer) {                  // 假如定时器还在，停止运行这个程序即可。
+      return false;
+    }
+    timer = setTimeout(function(){  //立一个定时器。
+      clearTimeout(timer);          //如果能走到这里就代表timer可以清除了，用定时器的时候，即用即清定时器是个好习惯。
+      timer = null;                 //和上面同一个操作。
+      _selt.apply(_me,args)         //执行传进来的函数
+    },interval || 500);             //如果没有第二个参数，默认500毫毛延迟执行。
+  }
+}
+window.onresize = throttle(function(){
+  console.log(999999);
+  
+},1000)
+
+//总结。
+//其实就是利用闭包的特性，记录了定时器，参数，是否第一个调用的三个状态。
+//如果定时器没走完就停止，走完了接着走。配合第一次的状态，效果就是，正常点击没问题，要是连续点击就不行，至少1000毫秒过后才能让你点击。
+
+</script>
+</html>
