@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+  <div id="div1">点击我绑定事件</div>
+<style>
+</style>
+</body>
+<script>
+// 前端开发中，处理一些兼容的问题是非常常见的，举例写一个在不同浏览器内兼容的事件绑定函数，常见的写法如下。
+var addEvent = function(elem,type,handler){
+  if (window.addEventListener) {
+    return elem.addEventListener(type,handler,false);
+  }
+  if (window.attachEvent) {
+    return elem.attachEvent('on' + type, handler);
+  }
+}
+// 这个函数有缺点，就是每次调用的时候都会执行if条件分支，虽然开销不大，但是毕竟可以避免。改进的方案是我们是判断兼容的条件提前到代码加载的时候，在记载的时候进行判断，返回一个正确的逻辑的函数。
+var addEvent = (function(){
+  if (window.addEventListener) {
+    return function(elem, type, handler){
+      elem.addEventListener(type, handler, false);
+    }
+  }
+  if (window.attachEvent) {
+    return function(elem, type, handler){
+      elem.attachEvent('on' + type, handler);
+    }
+  }
+})();
+// 后面如果需要的话，直接执行addEvent(ags)函即可，但是也有个缺点，如果我们从头到尾都没有使用过这个函数，这个函数写的不就是浪费了吗？
+// 所以终极的解决方案就是本案例的重点，惰性载入函数方案。 开始时，addEvent依然为一个普通的带有分支判断的函数，但是在第一次进入添条件分支后，在函数内部会重写这个函数。这样在下次进入的时候，就不存在条件分支。
+//这里为了好演示，我将添加个div作为按钮
+
+var addEvent = function(elem,type,handler){
+  if (window.addEventListener) {
+    addEvent = function(elem,type,handler){     //这行代码是惰性函数的精髓之一，就是自己函数内部重新给自己赋值，导致了第二次进入的时候，函数内部就变了。变成了修改后的内容。
+      elem.addEventListener(type, handler, false);
+    }
+  }else if(window.attachEvent){
+    addEvent = function(elem,type,handler){
+      elem.attachEvent('on' + type, handler);
+    }
+  }
+  addEvent(elem,type,handler);    //精髓之二，上面虽然修改了自己，但是因为函数没有执行完，并没有销毁，所以还是会执行自己。但是，注意的是，此时的addEvent的指向已经改变的，执行的其实是修改后的内容。
+}
+
+</script>
+</html>
