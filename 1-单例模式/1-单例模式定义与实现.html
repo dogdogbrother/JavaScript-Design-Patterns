@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+//单例模式的定义是：保证一个类仅有一个实例，并提供一个访问它的全局访问点。
+//举个例子，当我们点击登录按钮的时候，页面会有一个登录浮窗，而这个浮窗是唯一的，无论点击多少次登录按钮，这个浮窗指挥被创建一次，那么这个登录浮窗就适合用单例模式来创建。
+
+//实现一个标准的单例模式并不复杂，无非就是用一个变量记录当前是否为某个类创建过对象，如果是，则在下一次获取该类的实例时，直接返回之前创建的对象。
+
+var Singleton = function(name){ //从this.name = name 就猜得出来，这是个构造函数，等到被new
+  this.name = name;
+}
+
+Singleton.instance = null;      //就是上面所说的，记录变量用的
+
+Singleton.prototype.getName = function(){ //方法，弹出自己的name值
+  alert(this.name);
+}
+
+Singleton.getInstance = function(name){ 
+  if (!this.instance) {                   //假如这个记录变量没有被记录过，就代表是第一次执行此函数
+    this.instance = new Singleton(name);  //new一个Singleton对象出来，name是传参进来的值，可以说instance里面挂载了一个Singleton对象。
+  }
+  return this.instance;                   //把instance返回去，接受的变量里面就包含了Singleton对象，可以调用Singleton.getName();来查看自身的名字
+}
+
+var a = Singleton.getInstance('sven1');
+var b = Singleton.getInstance('sven2');
+console.log(a);
+console.log(b);
+
+b.getName(); //弹出sven1
+// a === b
+
+// 至此结束了，不管你调用了多少次Singleton.getInstance方法并传值，返回的都是对象的name值都是sven1，也就是第一次设置的内容。除非你手动设置下 Singleton.instance = null; 
+
+// 这个案例有个问题，就是增加了这个类的“不透明性”，使用者在使用的时候必须知道这是个单例模式，和以往的new ***的形式不同，使用Singleton.getInstance来获取对象让人看不明白。
+</script>
+</html>

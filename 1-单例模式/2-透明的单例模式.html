@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+//结合上面的1-文件的案例，这里实现一个透明的单例类，也就是可以通过这个类创建对象的时候，和使用其他类一样，用new ***的方式。
+//下面将使用CreateDiv单例类，他的作用是负责在页面中创建唯一的div节点。
+var CreateDiv = (function(){        //尾部有()是个自执行的函数
+  var instance;                     //备注写到了后面才发觉这是个闭包变量，CreateDiv用到了这个变量，而且CreateDiv被返回给外面了使用了，这个函数没有被销毁，instance成了闭包变量。
+
+  var CreateDiv = function(html){   //声明一个函数，参数是创建div里面的html内容。
+    if (instance) {                 
+      return instance;              //假如instance存在，就是返回instance，很熟悉，和上个案例的条件判断有点像。
+    }
+    this.html = html;               //把参数挂载到自己的身上  
+    this.init();                    //这里我有个疑惑，js有函数预览，但是prototype原型上的函数也会预览吗，我用log(1)和log(2)来测试，事实上是log(2)先执行，log(1)后执行
+    console.log(1);                 
+    return instance = this;         //把函数逻辑动作赋值给instance，下次进入的时候，如果instance有值，就返回给外面执行用
+  };
+                                    //CreateDiv变量里面有着一个instance变量，这个变量有html属性和init函数方法。
+
+  CreateDiv.prototype.init = function(){  
+    console.log(2);
+    var div = document.createElement('div');    //函数的逻辑就是创建了div并加到了页面中
+    div.innerHTML = this.html;
+    document.body.appendChild(div);
+  };
+
+  return CreateDiv;       //把CreateDiv抛给了外面，也是构造函数的特性？ 什么特性记得查
+
+})();
+
+var a = new CreateDiv('sven1'); // 这个构造函数执行的过程中，只有第一次进入才会被执行init函数，也就是添加div的方法。
+var b = new CreateDiv('sven2'); // 因为instance存在，所以没有走init()，虽然instance.init()是存在的，但是没有被执行过，所以没有重新给html属性赋值和添加div元素。
+
+//a.init();
+b.init();  //b就是构造函数里面的return回的CreateDiv函数，这个函数中有html属性，值为第一次执行init时赋值的sven1，也有init方法，执行测试下，发现页面上有给div了。再执行，再加一个。
+
+alert(a===b); // true  因为instance闭包变量的存在。规避掉了第二次的不同操作，所以就算参数不同，这两个对象也是一样的。
+</script>
+</html>

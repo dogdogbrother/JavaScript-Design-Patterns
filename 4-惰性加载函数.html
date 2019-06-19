@@ -49,5 +49,14 @@ var addEvent = function(elem,type,handler){
   addEvent(elem,type,handler);    //精髓之二，上面虽然修改了自己，但是因为函数没有执行完，并没有销毁，所以还是会执行自己。但是，注意的是，此时的addEvent的指向已经改变的，执行的其实是修改后的内容。
 }
 
+var div = document.getElementById('div1');
+
+addEvent(div, 'click', function(){
+  alert(1);
+});
+
+addEvent(div, 'click', function(){
+  alert(2);
+});
 </script>
 </html>
