@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+// 这节我们引入代理类的方式，来解决上面提到的问题。
+//依然使用上个章节的代码，首先在CreateDiv构造函数中，把负责管理单例的代码移除出去，使他成为一个普通的创建div的类。
+
+var CreateDiv = function(html){
+  this.html = html;
+  this.init();        //如果我把这行注释掉，那么在创建单例对象的时候，并不会插入dom，除非手动 对象.init();                              
+}
+
+CreateDiv.prototype.init = function(){    //init初始化的内容比较单纯，就是dom操作，写入值，插入dom。也就是成了一个普通的类函数
+  var div = document.createElement('div');    
+  div.innerHTML = this.html;
+  document.body.appendChild(div);
+};
+
+//接下来引入代理类 proxySingletonCreateDiv;
+var ProxySingletonCreateDiv = (function(){  //这个函数负责管理单例的逻辑，自身是个自执行函数。接受的变量会变成 new CreateDiv 的对象。
+
+  var instance;                           
+  return function(html){
+    if (!instance) {
+      instance = new CreateDiv(html);     //不管如果，都把CreateDiv类生成的对象反出去。
+    }
+    return instance;
+  }
+})();
+
+var a = new ProxySingletonCreateDiv('sven1');
+var b = new ProxySingletonCreateDiv('sven2');
+alert(a===b); //输出true
+b.init(); //这样操作下页面有了2个div了，内容都是sven1
+
+// 通过代理类 ProxySingletonCreateDiv ，配合普通函数 CreateDiv，组合起来达到单例模式效果。
+</script>
+</html>

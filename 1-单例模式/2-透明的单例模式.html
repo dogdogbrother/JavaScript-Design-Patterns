@@ -45,5 +45,20 @@ var b = new CreateDiv('sven2'); // 因为instance存在，所以没有走init()�
 b.init();  //b就是构造函数里面的return回的CreateDiv函数，这个函数中有html属性，值为第一次执行init时赋值的sven1，也有init方法，执行测试下，发现页面上有给div了。再执行，再加一个。
 
 alert(a===b); // true  因为instance闭包变量的存在。规避掉了第二次的不同操作，所以就算参数不同，这两个对象也是一样的。
+
+//到这为止，就完成了一个透明的单例类的编写，但是他同样不够完美，为了把instance封装起来，我们使用了自执行的匿名函数和闭包，并且让这个匿名函数返回真正的Singleton构造方法。
+//这增加了程序的复杂度，阅读起来也不是很舒服，我们观察现在的Singleton构造函数
+
+var CreateDiv = function(html){
+  if (instance) {
+    return instance;
+  }
+  this.html = html;
+  this.init();                                 
+  return instance = this;         
+}
+
+//这段代码中CreateDiv的构造函数实际上负责了两件事，第一件是创建了对象和执行初始化init方法，第二保证只有一个对象。虽然现在还没有完全明白什么是真正的单一职责函数，但是也能明白，这是不好的代码，至少看上去有点奇怪。
+//假如我们某天需要利用这个类，在页面中创建千千万万的div，既要让这个类变成一个普通的类，我们就必须修改删除CreateDiv中的if (instance)判断内容，给我们带来不必要的烦恼。
 </script>
 </html>
