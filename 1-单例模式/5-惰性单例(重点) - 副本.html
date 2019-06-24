@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+
+<button id="loginBtn">登录</button>
+</body>
+<script>
+// 惰性单例指的是在需要的时候才创建对象实例。举个例子来说明下惰性单例的作用和好处。还是说登录浮窗，介绍与全局变量结合实现惰性的单例。
+// 第一种方案，也是我第一反应的方法是在页面加载完成后便创建好这个div浮窗，这个浮窗开始是隐藏的，点击了某些条件的时候，他才开始显示。
+//代码就不写了，比较简单，没有意义。这种方式有一个问题，就是也许我们只是转转不进行登录操作，那么就很有可能拜拜浪费了一个dom节点的操作。
+
+//改进一下当我们点击登录按钮的时候在进行dom操作，插入浮窗，关闭时再删除此dom元素。
+//明显，如此频繁的创建和删除节点明显是不合理的，也是不必要的。
+
+//再改进一下，我们可以用一个flag变量来判断是否创建过弹窗，没有的话创建dom，取消是diaplay:none，有的话直接block。
+
+
+//这样我们完成了一个可用的惰性单例，但是我们发现它还有一些问题
+// 1. 违反单一职责原则，创建对象和管理单例的逻辑都放到了一个函数内部。
+// 2. 如果我们下次需要创建页面唯一的iframe，或者script便签，就需要如法炮制，把刚才的函数重抄一遍。
+
+//我们需要把不变的部分隔离出来，先不考虑创建一个div和创建一个iframe有多少差异，管理单例的逻辑是可以完全抽象出来的:用一个变量来标记是否创建过对象，如果是，则在下次直接返回这个已经创建好的对象。
+// var obj;
+// if (!obj) {
+//     obj = xxx;
+// }
+//把如何管理单例的逻辑从原来的代码中抽出来，这些逻辑封装在getSingle函数内部，创建对象的方法fn当做参数动态传入函数。
+
+var getSingle = function(fn){
+    var result;
+    return function(){
+        return result || (result = fn.apply(this,arguments)); // 如果result存在就返回result，不存在就返回传入的函数。
+    }
+}
+
+// 接下来我们用创建登录浮窗的方法用fn的形式传入getSingle，我们不仅可以创建浮窗，还可以createIframe等等。
+// 之后让getSingle返回一个新的函数并且用一个变量result来保存计算结果，result变量因为身在闭包中，它永远不会被销毁，在将来的请求中，如果result已经被赋值，那么他将返回这个值。
+
+var createLoginLayer = function(){
+    var div = document.createElement('div');
+    div.innerHTML = '我是登录浮窗';
+    div.style.display = 'none';
+    document.body.appendChild(div);
+    return div
+}
+
+var createSingleLoginLayer = getSingle(createLoginLayer);
+
+document.getElementById('loginBtn').onclick = function(){
+    var loginLayer = createLoginLayer();        //这个函数会返回一个已经被加入body里面的div，然后设置他的block就会显示了。
+    loginLayer.style.display = 'block';
+}
+</script>
+</html>
