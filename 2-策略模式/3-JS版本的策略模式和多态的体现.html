@@ -11,8 +11,27 @@
 </style>
 </body>
 <script>
-//
+//JS中，函数也是对象，所以更简单和直接的做法是把 strategy 直接定义为函数
 
+var strategies = {
+    'S':function(salary){
+        return salary * 4;
+    },
+    'A':function(salary){
+        return salary * 3;
+    },
+    'B':function(salary){
+        return salary * 2;
+    },
+}
 
+var calculateBonus = function(level,salary){
+    return strategies[level](salary);
+}
+console.log(calculateBonus('S',20000)); //输出80000
+
+// 多态在策略模式中的体现
+// 通过使用策略模式重构代码，我们消除了原程序中大片的条件分支语句。（其实是用了对象属性来判断的）
+// 计算奖金的逻辑不在调用函数里面，而是委托给了某个策略对象，每个策略对象每个属性都有自己赋负责的算法，可以根据函数的参数随意替换，这也是多态的一种体现。
 </script>
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+// 策略模式指的是定义一系列的算法，并且封装起来，刚才的缓动动画的算法就是封装的体现。但如果把策略模式仅仅用来封装算法，未免有点大材小用，实际上，策略模式也可以用来封装一系列的业务规则。
+// 只要这些业务规则指向的目标一致，并且可以被替换使用，我们就能用策略模式来封装。这里我们使用策略模式来完成表单检验的例子。
+// web项目中，我们经常力所能及的做一些表单校验的工作，减轻服务器压力。假设现在在编写一个注册页面，在点击注册按钮之前，有下面几条校验逻辑。
+// 用户名不能为空，密码长度不能少于6位，手机号码必须符合格式。
+// html就不写了，直接写js校验吧。
+
+var registerForm = document.getElementById('registerForm');
+registerForm.onsubmit = function(){
+    if (registerForm.userName.value === '') {
+        alert('用户名不能为空');
+        return;
+    }
+    if (registerForm.password.value.length < 6){ 
+        alert('密码长度不能少于6位');
+        return;
+    }
+}
+
+// 别问，问就是垃圾代码，函数缺乏弹性，if语句繁琐，算法复用性差。这里我们用策略模式重构下表单验证，很显然第一步我们将这些校验逻辑封装成策略对象。
+ 
+var strategies = {
+    isNonEmpty(value,errorMsg){
+        if (value === '') return errorMsg;
+    },
+    minLength(value,length,errorMsg){
+        if (value.length<length) return errorMsg;
+    },
+    isMobile(value,errorMsg){
+        if (!/(^1[3|5|8][0-9]{9}$)/.test(value)) return errorMsg;
+    }
+}
+// 这里我们实现 validator 类,负责接收用户的请求并委托给strategy对象。
+var validataFunc = function(){
+    var validator = new Validator(); 
+        //*******  添加一些校验规则  **************
+    validator.add(registerForm.userName,'isNonEmpty','用户名不能为空');
+    validator.add(registerForm.password,'minLength:6','密码长度不能少于6位');//这行代码其实有个反常规了。冒号后面的数字6表示校验过程中所必需的一些参数，如果不包含冒号就说明校验过程中不需要额外参数信息。
+    validator.add(registerForm.phoneNumber,'isMobile','手机号码格式不正确');
+
+    var errorMsg = validator.start(); //获得校验结果
+    return errorMsg; //返回校验结果
+}
+var registerForm = document.getElementById('registerForm');
+registerForm.onsubmit = function(){
+    var errorMsg = validataFunc(); //如果errorMsg有确切的返回值，说明未通过校验
+    if (errorMsg) {
+        alert(errorMsg);
+        return false; //阻止表单提交
+    }
+}
+// 最后是 validator 类的实现：
+var Validator = function(){
+    this.cache = []; //保存校验规则
+}
+Validator.prototype.add = function(dom,rule,errorMsg){
+    var ary = rule.split(':'); // 把 strategy 和参数分开，对应了50行的注释，也算是学到了传参的小技巧吧。。。聊胜于无
+    this.cache.push(function(){
+
+    })
+}
+</script>
+</html>
