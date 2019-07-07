@@ -5,14 +5,97 @@
 <title></title>
 </head>
 <body>
-    
-<style>
-
-</style>
+    <form action="" id="registerForm" method="post">
+        请输入用户名：<input type="text" name="userName"/>
+        请输入密码：<input type="text" name="password"/>
+        请输入手机号：<input type="text" name="phoneNumber"/>
+        <button>提交</button>
+    </form>
+<style></style>
 </body>
 <script>
-// 5- 的例子中有一个小遗憾，就是校验只能应对一种，如果我需要用户名不能为空并且长度要小于10呢。
+// 5- 的例子中有一个小遗憾，就是校验只能应对一种，如果我需要用户名不能为空并且长度要小于10呢。我期望以这样的形式进行校验。
+                // Validator.add(registerForm.userName,[
+                //             {
+                //                 strategy:'isNonEmpty',
+                //                 errorMsg:'用户名不能为空'
+                //             },
+                //             {
+                //                 strategy:'minLength:10',
+                //                 errorMsg:'用户名长度不能小于10位'
+                //             },
+                //         ]);
 
+//下面我们正式编写代码，提供可用于文本输入框对应多种校验规则
 
+/**********************************策略对象**********************/
+var strategies = {
+    isNonEmpty(value,errorMsg){
+        if (value === '') return errorMsg;
+    },
+    minLength(value,length,errorMsg){
+        if (value.length < length)  return errorMsg;
+    },
+    isMobile(value,errorMsg){
+        if (!/(^1[3|5|8][0-9]{9}$)/.test(value))  return errorMsg;
+    }
+}
+
+/**********************************validator类**********************/
+var Validator = function(){
+    this.cache = [];
+}
+Validator.prototype.add = function(dom,rules){
+    var self = this;            
+    for (var i = 0, rule; rule = rules[i++];) {  // 这里的for循环的使用是比较反人类的,把for循环的第二三个参数合并到了一起。当i大于rules最大下标的时候，返回的就是undefined,那么for循环就会被终止
+        (function(rule){        // rule 其实就是用户add时的第二个参数，也就是校验规则
+            var strategyAry = rule.strategy.split(':'); //这个分割下校验参数的，为啥要分割呢，因为minLength:10是调用的策略对象中的minLength属性，需要分割后取[0]位作为真正的匹配规则
+            var errorMsg = rule.errorMsg;               //add时填写的校验错误信息
+            self.cache.push(function(){                 // cache是挂载到自己身上的一个属性，值是一个数组,里面被塞满了函数
+                var strategy = strategyAry.shift();     // 把strategyAry数组的第一位删除，并保持起来。注意的是，strategyAry 有可能是长度为2，也有可能是长度是1，strategy的作用就一个，那就是用它找到真正的校验规则，例如strategies.isNonEmpty 这样的
+                strategyAry.unshift(dom.value);         // 往 strategyAry 中push form表单中对应的校验规则的值
+                strategyAry.push(errorMsg);             // strategyAry 尾部添加错误信息  strategyAry完整会是什么样子的呢。 ['森林','用户名不能为空'] 或 ['森林','10',用户名长度不能小于6位]
+                return strategies[strategy].apply(dom,strategyAry); // 这个函数的结尾是调用了 strategies 中的方法，参数就是 strategyAry，而这个方法有一个特性就是如果校验通过了就不会有 errorMsg 返回值
+            })
+        })(rule)
+    }
+}
+Validator.prototype.start = function(){         // start函数开始校验
+    for(var i=0,validatorFunc;validatorFunc=this.cache[i++];){ //会遍历this.cache[i++]，也就是我们存储的校验规则
+        var errorMsg = validatorFunc();         //执行这个校验规则函数就会执行最下面的函数，也就是返回 errorMsg 或空的
+        if (errorMsg) {
+            return errorMsg;
+        }
+    }
+}
+
+/**********************************客户调用代码**********************/
+var registerForm = document.getElementById('registerForm');
+
+var validataFunc = function(){
+    var validator = new Validator();
+    validator.add(registerForm.userName,[{ // 这章代码，最精髓的就是这个 add 和 start 函数，我们先看add函数干了什么
+        strategy:'isNonEmpty',
+        errorMsg:'用户名不能为空'
+    },
+    {
+        strategy:'minLength:6',
+        errorMsg:'用户名长度不能小于6位'
+    },
+    ]);
+    validator.add(registerForm.password,[{strategy:'minLength:6',errorMsg:'密码长度不能小于6位'}]);
+    validator.add(registerForm.phoneNumber,[{strategy:'isMobile',errorMsg:'手机号码格式不正确'}]);
+    var errorMsg = validator.start(); 
+    return errorMsg;
+}
+
+    //开始执行校验
+registerForm.onsubmit = function(){
+    var errorMsg = validataFunc();  //运行validataFunc函数，validataFunc函数里面 add了一些规则，然后执行 start 函数，如果有返回值就说明校验不通过。
+    if (errorMsg) {
+        alert(errorMsg);
+        return false;
+    }
+}
 </script>
 </html>
