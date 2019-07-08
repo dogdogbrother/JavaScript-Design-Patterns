@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+// 我们写一个代理对象 proxyImage，通过这个代理对象，在图片被真正加载好之前，页面中都会有一个loding.gif，提醒用户图片正在被加载。
+
+var myImage = (function(){      
+    var imgNode = document.createElement('img');    //这是一个自执行的函数，创建一个img标签并加入到body中去。
+    document.body.appendChild(imgNode);
+    return {                                        //但是赋值给src的这个动作却不是立即执行的，而是返回给了外卖，当我们myImage.setSrc('http....')的时候才会给这个src赋值
+        setSrc(src){                                //对象的setSrc()方法进行赋值。
+            imgNode.src = src;
+        }
+    }
+})();   
+var proxyImage =(function(){            //这个就是代理对象
+    var img = new Image;                //new 一个img便签出来，只是new出来一个，并没有添加到页面中
+    img.onload = function(){            
+        myImage.setSrc(this.src);       //当img加载完毕后 调用 myImage.setSrc 进行真正的赋值。可是到目前为止还没有给img的src赋值过，所有这个 onload 是等会才执行的。this.src 也可以替换成 img.src
+    }
+    return {
+        setSrc(src){                        // 把这 setSrc 抛给外面，当我们下面运行proxyImage.setSrc('http:...')的时候，代表我们是想要渲染一张图片的
+            myImage.setSrc('./img.jpg');    // 就马上给 myImage 建立的img便签赋值一个 loding 图片
+            img.src = src;                  // 然后给new 出来的img的src属性赋值，然后就发现27行的onload开始执行了，重新给myImage的img赋值了。就这样，完成一个图片预加载的过程
+        }
+    }
+})()
+proxyImage.setSrc('https://dogdogbrother.github.io/win10/img/ChMkJlbKyWeINfeGAAf6LP984DMAALINgAjdk0AB_pE874.jpg');
+
+// 现在我们通过 proxyImage 间接的访问 myImage。 proxyImage控制了客户对 myImage 的访问，并在此过程中加入一些自己的操作
+
+
+// ********************** 代理的意义 **********************
+// 如果只是在这个案例似乎代理的意义不大，因为我们完全可以把预加载的步骤写在 myImage 函数里面。
+// 但是这样做有一个好处，那就是----单一职责原则。如果有一天我们不再需要预加载功能了，那么我们直接删除掉 proxyImage 函数即可，不需要改动 myImage 函数。
+
+// **********************接口的一致性******************
+// 我们发现代理对象和本地都对外提供了 setSrc 方法，在客户看来，代理对象和本体是一致的
+</script>
+</html>
