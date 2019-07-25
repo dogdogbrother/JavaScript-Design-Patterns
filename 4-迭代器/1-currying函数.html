@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+//currying函数
+// 函数柯里化，又称部分求值。一个curring的函数会接受一些参数，但是并不会立即计算求值，而是继续返回另一个函数，刚才传入的参数在函数形成的闭包中被保存起来。
+// 待函数被真正需要求值的时候，之前传入的值会被一次性的用于求值。
+
+var cost = (function(){
+  var args = []; //                     1.这个就是闭包变量
+  return function(){ //闭包函数
+    if (arguments.length === 0) { //    3. 如果arguments.length为0，就是说不需要存参数了，而是要求值，于是乎遍历闭包变量，相加后返回给外部。
+      var money = 0;
+      for(var i=0; i<args.length; i++){
+        money += args[i];
+      }
+      return money;
+    }else{  //                          2. 如果有参数，就说明了不需要计算结果，而且储存参数到闭包的变量值里面来。
+      [].push.apply(args,arguments);//这个其实就是等同于 args.push(...arguments);因为es6之前没有扩展运算符，所以作者利用了apply携带参数有扩展运算的特性。
+    }
+  }
+})();
+cost(100,120);
+cost(200);
+cost(300);
+console.log(cost());
+
+</script>
+</html>
