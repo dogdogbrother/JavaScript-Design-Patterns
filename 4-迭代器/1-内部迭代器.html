@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+/*
+  基本上大部分语言很都内置了迭代器,其中像js的forEach等等,都是迭代器.
+  迭代器也分内部迭代器和外部迭代器,其中像forEach就是内部迭代器.
+  内部迭代器在调用的时候非常简单方便,只有在初始调用的时候设置好规则即可,但这同时也是迭代器的缺点.
+  由于迭代器的规则已经被定义好了,所以forEach函数就没办法同时迭代两个数组.
+*/
+
+/*
+  现在有个需求,要判断2个数组的值是否完全相等.
+*/
+var compare = function(ary1,ary2){
+  if(ary1.length !== ary2.length){
+    throw new Error('ary1和ary2不相等');
+  }    
+  ary1.forEach((item,index) => {
+    if (item!==ary2[index]) {
+      throw new Error('ary1和ary2不相等');
+    }
+  });
+  alert('ary1和ary2相等');
+}
+compare([1,2,3],[1,2,3]);
+
+//这个函数之所以能执行还要感谢js可以把函数当做参数传递,在其他语言就没有这么幸运了..
+</script>
+</html>

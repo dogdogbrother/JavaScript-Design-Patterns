@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+/*
+  外部迭代器必须显示的请求迭代下一个元素.
+  外部迭代器虽然增加了一些调用的复杂度,但相对也增强了迭代器的灵活性,我们可以手动控制迭代器的过程或者顺序.
+*/
+
+/*
+  下面代码的迭代器实例原本是Ruby写的,这里翻译成了js版本.
+*/
+
+var Iterator = function(obj){ //虽然参数名字是obj,其实这是个数组,应该是arr才对.
+  var current = 0;            //计数变量,差不多等于内部迭代器的index.
+  var next = function(){      
+    current += 1;             //
+  };
+  var isDone = function(){    
+    return current >= obj.length; //判断这个迭代器是否完成了
+  }
+  var getCurrItem = function(){    //getters函数,得到当前内容
+    return obj[current];
+  }
+  return {  
+    next,
+    isDone,
+    getCurrItem,
+    length:obj.length
+  }
+}
+
+/*
+  我们在上面已经定义了一个外部的迭代器,下面我们将使用这个迭代器改造下 compatre 函数,来判断两个数组是否相等.
+*/
+
+var iterator1 = Iterator([1,2,3]);
+//iterator1 有一个长度属性,三个方法,一个方法利用闭包记录了自己的index值,一个方法判断自己是不是已经遍历完毕了,一个方法得到自己当前index的值.
+var iterator2 = Iterator([1,2,3]);
+
+var compatre = function(iterator1,iterator2){
+  if (iterator1.length !== iterator2.length) {
+    alert('不等.')
+  }
+  while(!iterator1.isDone()&&!iterator2.isDone()){//这个地方写的其实有问题,因为上面两个数组的length都确认了,这个&&符没有意义
+    if (iterator1.getCurrItem()!==iterator2.getCurrItem()) {  //对比值
+      throw new Error('不相等')
+    }
+    iterator1.next(); //利用闭包,增加自身的index,也就是current闭包变量.
+    iterator2.next();
+  }
+  alert('相等');
+}
+
+compatre(iterator1,iterator2)
+
+</script>
+</html>
