@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+  <button id="button1">按钮1</button>
+  <button id="button2">按钮2</button>
+  <button id="button3">按钮3</button>
+<style>
+  
+</style>
+</body>
+<script>
+/*
+  假设我们正在编写一个用户界面呈现，该用户界面有数十个button按钮。
+  我们让一个程序员辅助画这些按钮，而另外一些程序员负责编写点击按钮后的具体行为，这些行为都将被封装在对象里。
+  如何在静态页面的按钮上，绑定onclick事件呢？
+*/
+
+var button1 = document.getElementById('button1');
+var button2 = document.getElementById('button2');
+var button3 = document.getElementById('button3');
+
+/*
+  接下来定义 setCommand 函数，setCommand函数负责往按钮上面安装命令。可以肯定的是，点击按钮会执行某个command命令，动作被约定为调用command对象的execute()方法。
+*/
+
+var setCommand = function(button,command){
+  button.onclick = function(){
+    command.execute();
+  }
+}
+
+/*
+  负责编写点击按钮之后的具体行为的程序员，他们要完成了刷新菜单界面，增加子菜单和删除子菜单这几个功能，功能被分布在 MenuBar 和 SubMenu 这两个对象中。
+*/
+
+var MenuBar = {
+  refresh:function(){
+    console.log('刷新菜单目录');
+  }
+}
+
+var SubMenu = {
+  add:function(){
+    console.log('增加子菜单');
+  },
+  del:function(){
+    console.log('删除子菜单');
+  }
+};
+
+/*
+  在让buttom变得有用之前，我们要先把这些行为都封装在命令类中
+*/
+
+var RefreshMenuBarCommand = function(receiver){
+  this.receiver = receiver;
+}
+RefreshMenuBarCommand.prototype.execute = function(){
+  this.receiver.refresh();
+}
+
+var AddSubMenuCommand = function(receiver){
+  this.receiver = receiver;
+}
+AddSubMenuCommand.prototype.execute = function(){
+  this.receiver.add();
+}
+
+var DelSubMenuCommand = function(receiver){
+  this.receiver = receiver;
+}
+DelSubMenuCommand.prototype.execute = function(){
+  console.log('删除子菜单');
+}
+
+/*
+  最后就是把命令接受者传入到 command 对象中，并且把command对象安装到button上面
+*/
+
+var refreshMenuBarCommand = new RefreshMenuBarCommand(MenuBar);
+var addSubMenuCommand = new AddSubMenuCommand(SubMenu);
+var delSubMenuCommand = new DelSubMenuCommand(SubMenu);
+console.log(refreshMenuBarCommand);
+
+setCommand(button1,refreshMenuBarCommand);
+setCommand(button2,addSubMenuCommand);
+setCommand(button3,delSubMenuCommand);
+
+/*
+  这就是个很简单的命令模式的实例，但从中可以看到我们是如何把请求发送和请求接收两者解耦开的。
+*/
+
+/*
+  这里我写一些我个人的解释。
+  1.我们先获取到元素。button1，button2，button3
+  2.写了setCommand函数，这个函数接受2个参数，第一个参数是dom元素，第二个参数是命令，然后函数内部让这个dom绑定命令。那么命令哪里来的呢？
+  3.写了2个对象MenuBar和SubMenu，里面有自己的方法，例如refresh刷新，add添加子菜单。
+  4.然后我们创建了三个函数，当类使用的，函数原型链上execute函数绑定了相应的3.中的方法。
+  5.然后我们再new下这三个类，得到三个命令对象，这三个对象都有receiver对象，原型链上都有execute方法。回顾4.中execute方法被绑定了相关的执行代码。
+  6.回答了2.的问题，命令就是这么来的，setCommand执行三次，安装三个onclick事件。
+*/
+
+</script>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+
+/*
+   假如我们现在正在开发一个网站商城，网站里面有header头部，nav导航，消息列表，购物车等等模块。
+   这几个模块的渲染都有一个共同特性，就是依赖ajax请求到的用户信息内容。
+   ajax什么时候能请求成功我们并不确认，不过我们可以使用异步回调的方式对他们的进行统一的整合。
+*/
+
+login.succ(data=>{
+  header.setAvatar(data.avatar);  //设置header模块的头像
+  nav.setAvatar(data.avatar);     //设置导航栏模块的头像
+  message.refresh();              //刷新消息列表
+  cart.refresh();                 //刷新购物车列表
+})
+
+/*
+   假如登录模块是我写的，而其他模块是不同人写的，那么我在写登录的时候还要知道header，message等等模块下面的方法叫什么，这些耦合性会使程序变的僵硬。
+   等哪天项目中添加了一个收获地址管理模块，又不得不找到你，让你在你的程序中再次添加 address.refresh();
+*/
+
+/*
+   需求到这，我们就发现了发布-订阅能更好的使这个程序更健壮一些。
+   我们登陆模块只管去发布登陆信息即可，业务方收到相关的数据后他们进行业务处理就行了。
+   代码如下
+*/
+$.ajax('http://xxx.com?login',(data)=>{ //登陆成功
+  login.trigger('loginSucc',data);      //发布登陆成功的消息
+})
+
+/*
+  然后我们设置其他模块的订阅即可，其实在业务上这样是反的，我们应该先写订阅，再写发布。
+*/
+
+var header = (function(){
+  login.listen('loginSucc',function(data){  //注册了订阅。
+    header.setAvatar(data.avatar)
+  })
+  return {
+    setAvatar(data){
+      console.log('我设置了header模块的头像');
+    }
+  }
+})();
+
+/*
+  这个函数其实写的挺精妙的，函数是个自执行的函数，但是回调函数是不会运行的，当回调函数运行的时候，因为return了函数的原因，还能调用自身函数，秒啊。
+*/
+
+/*
+  如果有一天我们还要增加地址列表模块，那么我们直接注册订阅就行了。
+*/
+
+var address = (function(){
+  login.listen('loginSucc',function(obj){  //注册了订阅。
+    address.refresh(obj);
+  })
+  return {
+    refresh(avatar){
+      console.log('刷新收获地址列表');
+    }
+  }
+})();
+
+/*
+  OK。 大功告成。
+*/
+
+</script>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+/*
+  发布-订阅模式
+  小明看上了一套房子，可惜一期已经售罄了，二期才能购买，具体二期什么时候好还不一定。
+  于是小明记下了售楼处的电话，每天打一遍询问一下，这个是比较不科学的事情，因为要买房的不一定只有小明，有可能有几百个人，每天售楼处要累死了。
+  正常的做法是售楼处记下所有想买房子人的电话，当二期可以购买的时候，找着电话簿全部发条短信就行了。
+  很明显，小明是订阅者，售楼处是发布者。
+*/
+
+/*
+ 事实上，DOM事件本身就是发布订阅模式
+*/
+
+document.body.addEventListener('click',function(){
+  alert(2)
+},false);
+
+document.body.click();
+
+/*
+ 我们需要监听用户点击document.body的动作，但是我们没有办法预知用户什么时候点击，所有我们订阅了document.body上的click事件。
+ 当body被点击的时候，body节点便会向订阅者发布这个消息。
+ 当然我们还可以随意增加删除订阅者，都不会影响发布者代码的编写。
+*/
+document.body.addEventListener('click',function(){
+  alert(3)
+},false);
+
+document.body.click();
+//有几个订阅就会弹几次alert
+</script>
+</html>

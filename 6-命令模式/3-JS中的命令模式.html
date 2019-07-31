@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+  <button id="button1">按钮1</button>
+  <button id="button2">按钮2</button>
+  <button id="button3">按钮3</button>
+<style>
+  
+</style>
+</body>
+<script>
+
+var button1 = document.getElementById('button1');
+var button2 = document.getElementById('button2');
+var button3 = document.getElementById('button3');
+
+/*
+  1-的示例实在是太麻烦了，绕来绕去也不知道再搞个啥JB玩意，即使不用模式，JS几行代码就能实现相同的功能。
+*/
+
+var bindClick = function(button,func){
+  button.onclick = func;
+}
+
+var MenuBar = {
+  refresh:function(){
+    console.log('刷新页面');
+  }
+}
+
+var subMenu = {
+  add:function(){
+    console.log('增加子菜单');
+  },
+  del:function(){
+    console.log('删除子菜单');
+  },
+}
+
+bindClick(button1,MenuBar.refresh);
+bindClick(button2,subMenu.add);
+bindClick(button3,subMenu.del);
+</script>
+</html>

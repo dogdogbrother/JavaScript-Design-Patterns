@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+</head>
+<body>
+    
+<style>
+
+</style>
+</body>
+<script>
+/*
+  
+*/
+
+/*
+   除了DOM事件，我们还会经常自定义发布订阅模式，看看如果分步实现发布订阅模式。
+   1.首先指定好谁充当发布者(比如售楼处)
+   2.然后给发布者添加一个缓存列表，用于存放回调函数，以便通知订阅者。(售楼处的通讯录)
+   3.最后发布消息的时候，发布者会依次触发缓存列表中的回调函数。(遍历通讯录，挨个发短信)
+   4.另外，我们还可以给回调函数里面填入一些参数，订阅者可以接受这些参数。例如售楼处的短信里面加上房子的单机，面积等等。
+*/
+
+var salesOffices = {};  //定义售楼处
+
+salesOffices.clientList = []; //缓存列表，用于存放订阅者的回调函数
+
+salesOffices.listen = function(fn){ //增加订阅者
+  this.clientList.push(fn); //订阅者的消息push到缓存列表
+}
+
+salesOffices.trigger = function(){  //发布小消息
+  for(var i=0, fn; fn = this.clientList[i++];){
+    fn.apply(this,arguments);   //arguments是发布消息时带上的参数
+  }
+}
+
+/*
+ 下面我们进行一些简单的测试
+*/
+salesOffices.listen(function(price,squareMeter){  //小明订阅消息
+  console.log('价格=' + price);
+  console.log('squareMeter=' + squareMeter);
+});
+
+salesOffices.listen(function(price,squareMeter){  //小红订阅消息
+  console.log('价格=' + price);
+  console.log('squareMeter=' + squareMeter);
+});
+
+salesOffices.trigger(2000000,88);
+salesOffices.trigger(3000000,110);
+
+// 到这，一个最简单的发布-订阅模式就完成了，但是他有问题，我们假设小明只想要88平米的房子，但是售楼处全部的订阅信息都发给他了，太多了也会有烦恼。
+// 所以我们有必要增加一个标示key，让订阅者只订阅自己感兴趣的消息。 下个
+</script>
+</html>

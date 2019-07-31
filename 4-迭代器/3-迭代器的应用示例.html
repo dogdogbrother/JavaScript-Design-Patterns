@@ -12,12 +12,72 @@
 </body>
 <script>
 /*
-  
+  有段代码是这样的，根据不同的浏览器获取相应的上传组件对象。因为代码比较繁琐，具体的用伪代码来实现
 */
+var getUploadObj = function(){
+    try{
+        //new IE上传控制
+    }catch(e){
+        if(supportFlash()){
+            // return
+        }else{
+            // return
+        }
+    }
+}
 
 /*
-  
+  这个函数的去缺点显而易见，然而最不能让人忍受的是，假如我想增加HTML5上传，那么我要在else里面嵌套if。
+  改造的思路是，我们把每种获取upload对象的方法都封装在各自的函数里面，然后使用一个迭代器，迭代获取这些upload对象，直到获取到一个可用的为止。
 */
 
+var getActiveUploadObj = function(){
+    try{
+        return new ActiveXObject();
+    }catch(e){
+        return false;
+    }
+}
+
+var getFlashUploadObj = function(){
+    if (supportFlash()) {
+        return;
+    }else{
+        return false
+    }
+}
+
+var getFormUploadObj = function(){
+    return;
+}
+/*
+  getActiveUploadObj,getFlashUploadObj,getFormUploadObj 这三个函数都有一个共同约定，如果该函数里面的upload对象是可用的，则让函数返回该对象，反之返回false，提示迭代器继续迭代。
+  迭代器代码如下
+*/
+
+var iteratorUploadObj = function(){
+    for(var i=0,fn;fn=arguments[i++];){
+        var uploadObj = fn();
+        if (uploadObj !== false) {
+            return uploadObj;
+        }
+    }
+}
+
+var uploadObj = iteratorUploadObj(getActiveUploadObj,getFlashUploadObj,getFormUploadObj);
+
+/*
+  重构代码之后，我们可以看到，获取不同上传对象的方法被隔离起来了互不干扰了，如果我们想增加HTML5上传，要做的仅仅是下面的一些工作。
+*/
+
+var getHTML5UploadObj = function(){
+    // 具体代码 return;
+}
+
+var uploadObj = iteratorUploadObj(getActiveUploadObj,getFlashUploadObj,getFormUploadObj,getHTML5UploadObj);
+
+/*
+  总结下，感觉这小章节讲的不是迭代器，而是策略模式。。。
+*/
 </script>
 </html>
